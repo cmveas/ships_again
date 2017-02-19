@@ -32,30 +32,15 @@ public class CameraController : MonoBehaviour {
 
 	string modifyObjectXPosition (Camera camera)
 	{
-		float width = camera.pixelWidth;
-		float height = camera.pixelHeight;
-
 		float startX = camera.transform.position.x;
-		float startY = camera.transform.position.y;
-		float endX = startX + width;
-		float endY = startY + height;
-
 		return correctHorizontally(startX);
-
-	
 	}
 
 	string modifyObjectYPosition (Camera camera)
 	{
-		float width = camera.pixelWidth;
-		float height = camera.pixelHeight;
-
-		float startX = camera.transform.position.x;
 		float startY = camera.transform.position.y;
-		float endX = startX + width;
-		float endY = startY + height;
 
-		return correctVertically(startX);
+		return correctVertically(startY);
 
 	
 	}
@@ -87,11 +72,11 @@ public class CameraController : MonoBehaviour {
 			rigidBody.position = new Vector3
 		(
 					Mathf.Clamp(GetComponent<Camera>().transform.position.x,mMinX,mMaxX) ,
-					Mathf.Clamp(GetComponent<Camera>().transform.position.y,mMinY,mMaxY), 
+					transform.position.y	, 
 				0f
 		);
 
-			return "not centered correcting" + limit;
+			return "not centered correcting " + limit;
 		}
 	}
 
@@ -103,7 +88,7 @@ public class CameraController : MonoBehaviour {
 		if (mThreshHoldVertically >= limitAbs) {
 			var rigidBody = GetComponent<Rigidbody2D> ();
 			rigidBody.velocity = reduceSpeedY(rigidBody.velocity);
-			return "centered";
+			return "centered " + limit;
 		} else {
 			Vector3 movement = new Vector3 (0f, limit,0f );
 			var rigidBody = GetComponent<Rigidbody2D> ();
@@ -111,7 +96,7 @@ public class CameraController : MonoBehaviour {
 
 			rigidBody.position = new Vector3
 		(
-				Mathf.Clamp(rigidBody.position.x,mMinX,mMaxX) ,
+				rigidBody.position.x ,
 				Mathf.Clamp(rigidBody.position.y,mMinY,mMaxY), 
 				0f
 		);
