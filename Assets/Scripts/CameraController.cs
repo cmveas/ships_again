@@ -30,20 +30,6 @@ public class CameraController : MonoBehaviour {
 		offset = transform.position - player.transform.position;
 	}
 
-	string modifyObjectXPosition (Camera camera)
-	{
-		float startX = camera.transform.position.x;
-		return correctHorizontally(startX);
-	}
-
-	string modifyObjectYPosition (Camera camera)
-	{
-		float startY = camera.transform.position.y;
-
-		return correctVertically(startY);
-
-	
-	}
 
 	Vector2 reduceSpeedX (Vector2 velocity)
 	{
@@ -55,62 +41,68 @@ public class CameraController : MonoBehaviour {
 		return new Vector3(velocity.x,velocity.y/2);
 	}
 
-	string correctHorizontally (float startX)
-	{
+	string correctPosition(){
+		var rigidBody = GetComponent<Rigidbody2D> ();
+		float startX = GetComponent<Camera>().transform.position.x;
+		float startY = GetComponent<Camera>().transform.position.y;
+
 		float limit = player.transform.position.x-startX;
 		float limitAbs = Mathf.Abs (limit);
 
-		if (mThreshHoldHorizontally >= limitAbs) {
-			var rigidBody = GetComponent<Rigidbody2D> ();
-			rigidBody.velocity = reduceSpeedX(rigidBody.velocity);
-			return "centered";
-		} else {
-			Vector3 movement = new Vector3 (limit, 0f,0f );
-			var rigidBody = GetComponent<Rigidbody2D> ();
-			rigidBody.velocity = movement * mSpeed;
+		var xvelocity = getXVelocity (startX);
+		var yvelocity = getYVelocity (startY);
 
+			rigidBody.velocity = new Vector2(xvelocity.x,yvelocity.y);
 			rigidBody.position = new Vector3
 		(
-					Mathf.Clamp(GetComponent<Camera>().transform.position.x,mMinX,mMaxX) ,
-					transform.position.y	, 
+				Mathf.Clamp(GetComponent<Camera>().transform.position.x,mMinX,mMaxX) ,
+				Mathf.Clamp(GetComponent<Camera>().transform.position.y,mMinY,mMaxY)	, 
 				0f
 		);
 
-			return "not centered correcting " + limit;
-		}
+		return rigidBody.position.ToString();
 	}
 
-	string correctVertically (float startY)
-	{
+	Vector2 getXVelocity (float startX)
+	{	
+		Vector2 velocityX;
+		var rigidBody = GetComponent<Rigidbody2D> ();
+		float limit = player.transform.position.x-startX;
+		float limitAbs = Mathf.Abs (limit);
+		if (mThreshHoldHorizontally >= limitAbs) {
+			
+			velocityX = reduceSpeedX (rigidBody.velocity);
+		} else {
+			Vector3 movement = new Vector3 (limit, 0f,0f );
+
+			velocityX = movement * mSpeed;
+		}
+		return velocityX;
+	}
+
+	Vector2 getYVelocity (float startY)
+	{	
+		Vector2 velocityY;
+		var rigidBody = GetComponent<Rigidbody2D> ();
 		float limit = player.transform.position.y-startY;
 		float limitAbs = Mathf.Abs (limit);
 
 		if (mThreshHoldVertically >= limitAbs) {
-			var rigidBody = GetComponent<Rigidbody2D> ();
-			rigidBody.velocity = reduceSpeedY(rigidBody.velocity);
-			return "centered " + limit;
+			velocityY = reduceSpeedY(rigidBody.velocity);
 		} else {
 			Vector3 movement = new Vector3 (0f, limit,0f );
-			var rigidBody = GetComponent<Rigidbody2D> ();
-			rigidBody.velocity = movement * mSpeed;
-
-			rigidBody.position = new Vector3
-		(
-				rigidBody.position.x ,
-				Mathf.Clamp(rigidBody.position.y,mMinY,mMaxY), 
-				0f
-		);
-
-			return "not centered correcting " + limit;
+			velocityY = movement * mSpeed;
 		}
+		return velocityY;
 	}
+
+
 	
 	// Update is called once per frame
 	void LateUpdate () {
 		//transform.position = player.transform.position + offset;
 
 		Camera camera = transform.GetComponent<Camera>();
-		print("Object is X " + modifyObjectXPosition(camera));
-		print("Object is Y " + modifyObjectYPosition(camera));
+		print("Object is  " + correctPosition());
 	}
 }
